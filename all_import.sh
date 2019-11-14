@@ -58,12 +58,14 @@ function subSplitStr() {
           real_name=${line#*<}
           real_name1=${real_name%%/*}
         else
-          real_name1=$line
+          real_name=${line#*<}
+          real_name1=${real_name%%>*}
         fi
         echo $real_name1>> subSplitStr.txt
     done
      sort "subSplitStr.txt" |uniq > end_result.txt
 }
+
 
 
 function find_file() {
