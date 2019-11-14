@@ -52,7 +52,11 @@ function findWord(){
 
                 if [ `grep -c $real_name "all_file.txt"` -le '0' ];
                 then
-                    echo $real_name>> findWord.txt
+                    library_name="library_name"
+                    echo $library_name>> findWord.txt
+                    new_string="<$library_name\/$real_name>"
+                    origin_string="\"$real_name\""
+                    sed -i "" "s/$origin_string/$new_string/g" "$1"
                 fi
             fi
         fi
