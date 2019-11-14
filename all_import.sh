@@ -50,6 +50,25 @@ function findRepoName(){
     done
 }
 
+function replace_word_output_library(){
+    can_not_replace=$3
+    repo_name=$2
+    library_name=""
+    findRepoName $third_param
+    if [[ "$library_name" != "" ]]
+    then
+        echo $library_name>> findWord.txt
+        if [[ "$can_not_replace" != "1" ]]
+        then
+            new_string="<$library_name\/$repo_name>"
+            origin_string="\"$repo_name\""
+            sed -i "" "s/$origin_string/$new_string/g" "$1"
+        else
+            echo $library_name
+        fi
+    fi
+}
+
 function findWord(){
     cat $1 | while read line
     do
@@ -61,11 +80,12 @@ function findWord(){
             then
                 real_name=${line#*<}
                 real_name=${real_name%%/*}
+                echo $real_name>> findWord.txt
             else
                 real_name=${line#*<}
                 real_name=${real_name%%>*}
+                replace_word_output_library $1 $real_name 1
             fi
-            echo $real_name>> findWord.txt
         else
         result=$(echo $line | grep "#import \"")
             if [[ "$result" != "" ]]
@@ -74,18 +94,9 @@ function findWord(){
                 real_name=0
                 real_name=${line#*\"}
                 real_name=${real_name%%\"}
-                repo_name=$real_name
                 if [[ `grep -c $real_name "all_file.txt"` -le '0' ]];
                 then
-                    library_name=""
-                    findRepoName $third_param
-                    if [[ "$library_name" != "" ]]
-                    then
-                        echo $library_name>> findWord.txt
-                        new_string="<$library_name\/$real_name>"
-                        origin_string="\"$real_name\""
-                        sed -i "" "s/$origin_string/$new_string/g" "$1"
-                    fi
+                    replace_word_output_library $1 $real_name $0
                 fi
             fi
         fi
