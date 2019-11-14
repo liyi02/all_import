@@ -58,8 +58,8 @@ function subSplitStr() {
           real_name=${line#*<}
           real_name1=${real_name%%/*}
         else
-          real_name=${line#*<}
-          real_name1=${real_name%%>*}
+            real_name=${line#*<}
+            real_name1=${real_name%%>*}
         fi
         echo $real_name1>> subSplitStr.txt
     done
@@ -67,13 +67,12 @@ function subSplitStr() {
 }
 
 
-
 function find_file() {
     cat $1 | while read line;
     do
         if [ `grep -c $line $2` -le '0' ];
         then
-            echo $real_name>> finally_result.txt
+            echo $line>> finally_result.txt
         fi
     done
 }
