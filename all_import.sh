@@ -13,7 +13,7 @@ library_name=""
 function read_dir(){
 for file in ` ls $1 `
     do
-        if [ -d $1"/"$file ]
+        if [[ -d $1"/"$file ]]
         then
             read_dir $1"/"$file
         else
@@ -34,7 +34,7 @@ done
 function findRepoName(){
     for file in ` ls $1 `
     do
-        if [ -d $1"/"$file ]
+        if [[ -d $1"/"$file ]]
         then
             findRepoName $1"/"$file
         else
@@ -71,10 +71,11 @@ function findWord(){
             if [[ "$result" != "" ]]
             then
                 #截取字符串
+                real_name=0
                 real_name=${line#*\"}
                 real_name=${real_name%%\"}
                 repo_name=$real_name
-                if [ `grep -c $real_name "all_file.txt"` -le '0' ];
+                if [[ `grep -c $real_name "all_file.txt"` -le '0' ]];
                 then
                     library_name=""
                     findRepoName $third_param
@@ -100,7 +101,7 @@ function checkReplace() {
 function find_file() {
     cat $1 | while read line;
     do
-        if [ `grep -c $line $2` -le '0' ];
+        if [[ `grep -c $line $2` -le '0' ]];
         then
             echo $line>> finally_result.txt
         fi
@@ -111,7 +112,7 @@ function find_all_file () {
 
 for file in ` ls $1 `
     do
-        if [ -d $1"/"$file ]
+        if [[ -d $1"/"$file ]]
         then
             find_all_file $1"/"$file
         else
