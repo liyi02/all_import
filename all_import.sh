@@ -3,7 +3,7 @@
 
 m_suffix=".m"
 h_suffix=".h"
-pch_suffix=".pch"
+pch_suffix="pch"
 
 function read_dir(){
 for file in ` ls $1 `
@@ -27,6 +27,7 @@ for file in ` ls $1 `
         fi
 done
 }
+
 function findWord(){
     num=1
     cat $1 | while read line
@@ -34,33 +35,50 @@ function findWord(){
         result=$(echo $line | grep "#import <")
         if [[ "$result" != "" ]]
         then
-            echo $line>> liyi_result2.txt
+            echo $line>> findWord.txt
         fi
     num=$((num+1))
     done
-    checkReplace "liyi_result2.txt"
+    checkReplace "findWord.txt"
 }
 
 function checkReplace() {
-    sort $1 |uniq > replace.txt
-    subSplitStr "replace.txt"
+    sort $1 |uniq > checkReplace.txt
+    subSplitStr "checkReplace.txt"
 }
 
+
+#截取字符串
 function subSplitStr() {
     cat $1 | while read line;
-        do
-            result=$(echo $line | grep "/")
-        if [[ "$result" != "" ]]
+    do
+       result=$(echo $line | grep "/")
+       if [[ "$result" != "" ]]
         then
-            real_name=${line#*<}
-            real_name1=${real_name%%/*}
+          real_name=${line#*<}
+          real_name1=${real_name%%/*}
         else
-            real_name1=line
+          real_name1=$line
         fi
-        echo $real_name1>> resultsolit.txt
-        done
-        sort "resultsolit.txt" |uniq > end_result1.txt
+        echo $real_name1>> subSplitStr.txt
+    done
+     sort "subSplitStr.txt" |uniq > end_result.txt
 }
+
+
+function find_file() {
+    cat $1 | while read line;
+    do
+        if [ `grep -c $line $2` -le '0' ];
+        then
+            echo $real_name>> finally_result.txt
+        fi
+    done
+}
+left_file=$1
+right_file=$2
+
 
 #测试目录 test
 read_dir $1
+find_file "end_result.txt" $right_file
