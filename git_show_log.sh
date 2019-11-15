@@ -24,11 +24,11 @@ do
                 real_name_before=${real_name%%/*}
                 #后面的.h
                 real_name_after_pex=${real_name##*/}
-                real_name_after=${real_name_after_pex: -1}
+                real_name_after=${real_name%%>*}
                 #对库名real_name_before处理，搜索不到库名
                 #对real_name_after进行处理
                 echo $real_name_before>> findWord.txt
-                echo $real_name_before>> findWord.txt
+                echo $real_name_after>> findWord.txt
 
             else
                 #场景3#import<B.h>
@@ -63,11 +63,11 @@ do
                     #判断当前库中是否包含这个头文件
                     echo $real_name>> findWord.txt
 
-                    if [[ `grep -c $real_name "all_file.txt"` -le '0' ]];
-                    then
+#                    if [[ `grep -c $real_name "all_file.txt"` -le '0' ]];
+#                    then
                         #不包含就对real_name进行处理
                         echo #场景-----4 $real_name>> findWord.txt
-                    fi
+#                    fi
                  fi
             fi
         fi
