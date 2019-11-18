@@ -9,7 +9,6 @@ function is_repo_name(){
     result=$(echo `ls "../Lianjia_iOS_Shell_Project/Pods/"` | grep $1)
     if [[ "$result" != "" ]]
     then
-        echo isARepo
         return 1
     fi
     return 0
@@ -27,7 +26,8 @@ function is_current_repo(){
 
 #寻找此仓库是否被正确依赖
 function is_repo_dependent(){
-    result=`echo "$(dirname "$PWD").podspec" | grep $1`
+    podspec_name=${dir##*/}
+    result=`cat "${dir}/${podspec_name}.podspec" | grep $1`
     if [[ "$result" != "" ]]
     then
         return 1
@@ -37,6 +37,7 @@ function is_repo_dependent(){
 
 function finish_execute(){
  rm -f all_diff.txt
+ echo 111111111111$1
  exit $1
 }
 
@@ -84,24 +85,20 @@ do
                 if test $? = "1"
                 then #如果/前边的是仓库名
                     is_repo_dependent $real_name_before
-                    if test $? = 1 #如果是仓库名且本仓库正确依赖了这个仓库
+                    if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
                     then
-                        finish_execute 0
-                    else
-                        echo ${real_name_before}没有被这个仓库依赖，请正确依赖
-                        finish_execute 1;
+                        echo ${real_name_before}没有被这个仓库依赖，请正确依赖1
+                        finish_execute 1
                     fi
                 else #如果/前边的不是仓库名，匹配/后面的
                     find_library_name $real_name_after
                     if [[ "$library_name" != "" ]]
                     then
                         is_repo_dependent $library_name
-                        if test $? = 1#本仓库正确依赖了这个.h文件所在仓库
+                        if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
                         then
-                            finish_execute 0;
-                        else #本仓库没有正确依赖了这个.h文件所在仓库
-                            echo ${real_name_before}没有被这个仓库依赖，请正确依赖
-                            finish_execute 1;
+                            echo ${real_name_before}没有被这个仓库依赖，请正确依赖2
+                            finish_execute 1
                         fi
                     fi
                 fi
@@ -112,23 +109,21 @@ do
                 real_name=${real_name%%>*}
                 #判断当前库中是否包含这个头文件
                 is_current_repo $real_name
-                if [[ "$?" != "" ]]
+                if [[ "$?" == "" ]]
                 then
-                    finish_execute 0;
-                fi
-                #当前库不包含这个头文件，找到这个文件所在
-                find_library_name $real_name
-                if [[ "$library_name" != "" ]]
-                then
-                    is_repo_dependent $library_name
-                    if test $? = 1#本仓库正确依赖了这个.h文件所在仓库
+                    #当前库不包含这个头文件，找到这个文件所在
+                    find_library_name $real_name
+                    if [[ "$library_name" != "" ]]
                     then
-                        finish_execute 0;
-                    else #本仓库没有正确依赖了这个.h文件所在仓库
-                        echo ${real_name_before}没有被这个仓库依赖，请正确依赖
-                        finish_execute 1;
+                        is_repo_dependent $library_name
+                        if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
+                        then
+                             echo ${real_name_before}没有被这个仓库依赖，请正确依赖3
+                            finish_execute 1
+                        fi
                     fi
                 fi
+                
             fi
         else
         result=$(echo $line | grep "#import \"")
@@ -149,11 +144,9 @@ do
                 if test $? = 1
                 then #如果/前边的是仓库名
                     is_repo_dependent $real_name_before
-                    if test $? = 1 #如果是仓库名且本仓库正确依赖了这个仓库
+                    if test $? = 0 #如果是仓库名且本仓库正确依赖了这个仓库
                     then
-                        finish_execute 0;
-                    else
-                        echo ${real_name_before}没有被这个仓库依赖，请正确依赖
+                        echo ${real_name_before}没有被这个仓库依赖，请正确依赖4
                         finish_execute 1;
                     fi
                 else #如果/前边的不是仓库名，匹配/后面的
@@ -161,11 +154,9 @@ do
                     if [[ "$library_name" != "" ]]
                     then
                         is_repo_dependent $library_name
-                        if test $? = 1#本仓库正确依赖了这个.h文件所在仓库
+                        if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
                         then
-                            finish_execute 0;
-                        else #本仓库没有正确依赖了这个.h文件所在仓库
-                            echo ${real_name_before}没有被这个仓库依赖，请正确依赖
+                            echo ${real_name_before}没有被这个仓库依赖，请正确依赖5
                             finish_execute 1;
                         fi
                     fi
@@ -181,25 +172,20 @@ do
                     then
                         #判断当前库中是否包含这个头文件
                         is_current_repo $real_name
-                        if [[ "$?" != "" ]]
+                        if [[ "$?" == "" ]]
                         then
-                            finish_execute 0;
-                        fi
-                        #当前库不包含这个头文件，找到这个文件所在
-                        find_library_name $real_name
-                        if [[ "$library_name" != "" ]]
-                        then
-                            is_repo_dependent $library_name
-                            if test $? = 1#本仓库正确依赖了这个.h文件所在仓库
+                            #当前库不包含这个头文件，找到这个文件所在
+                            find_library_name $real_name
+                            if [[ "$library_name" != "" ]]
                             then
-                                finish_execute 0;
-                            else #本仓库没有正确依赖了这个.h文件所在仓库
-                                echo ${real_name_before}没有被这个仓库依赖，请正确依赖
-                                finish_execute 1;
+                                is_repo_dependent $library_name
+                                if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
+                                then
+                                    echo ${real_name_before}没有被这个仓库依赖，请正确依赖6
+                                    finish_execute 1;
+                                fi
                             fi
                         fi
-                        #不包含就对real_name进行处理
-                        #调用易哥的方法
      
                     fi
                  fi
@@ -207,7 +193,7 @@ do
         fi
     fi
 done
-
+finish_execute 0;
 
 
 
