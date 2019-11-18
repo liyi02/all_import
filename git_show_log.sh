@@ -18,7 +18,6 @@ function is_repo_name(){
 function is_current_repo(){
 podspec_name=${dir##*/}
     result=`ls -R ${dir}/${podspec_name} |grep -v ^d | awk '{print $1}' | grep $1`
-    echo $result
     if [[ "$result" != "" ]]
     then
         return 1
@@ -38,8 +37,8 @@ function is_repo_dependent(){
 }
 
 function finish_execute(){
- rm -f all_diff.txt
- exit $1
+# rm -f all_diff.txt
+exit $1
 }
 
 function find_library_name(){
@@ -52,7 +51,6 @@ function find_library_name(){
     fi
     if [[ "$library_name" != "" ]]
     then
-        echo $library_name
         return 1
     fi
     
@@ -71,6 +69,7 @@ function find_library_name(){
 }
 
 git show> all_diff.txt
+cat all_diff.txt > all_diff1.txt
 cat all_diff.txt | while read line
 do
     result=$(echo $line | grep "+")
@@ -112,7 +111,7 @@ do
                         is_repo_dependent $library_name
                         if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
                         then
-                            echo ${real_name_before}没有被这个仓库依赖，请正确依赖
+                            echo ${library_name}没有被这个仓库依赖，请正确依赖
                             finish_execute 1
                         fi
                     fi
@@ -133,7 +132,7 @@ do
                         is_repo_dependent $library_name
                         if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
                         then
-                            echo ${real_name_before}没有被这个仓库依赖，请正确依赖
+                            echo ${library_name}没有被这个仓库依赖，请正确依赖
                             finish_execute 1
                         fi
                     fi
@@ -171,7 +170,7 @@ do
                         is_repo_dependent $library_name
                         if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
                         then
-                            echo ${real_name_before}没有被这个仓库依赖，请正确依赖
+                            echo ${library_name}没有被这个仓库依赖，请正确依赖
                             finish_execute 1;
                         fi
                     fi
@@ -193,7 +192,7 @@ do
                             is_repo_dependent $library_name
                             if test $? = 0 #本仓库没有正确依赖了这个.h文件所在仓库
                             then
-                                echo ${real_name_before}没有被这个仓库依赖，请正确依赖
+                                echo ${library_name}没有被这个仓库依赖，请正确依赖
                                 finish_execute 1;
                             fi
                         fi
@@ -203,7 +202,7 @@ do
         fi
     fi
 done
-finish_execute 0;
+
 
 
 
