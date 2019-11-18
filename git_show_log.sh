@@ -30,7 +30,7 @@ sort all_diff.txt |uniq > new_all_diff.txt
 
 while read line
 do
-    result=$(echo $line | grep "+")
+    result=$(echo $line | grep "^+")
     if [[ "$result" != "" ]]
     then
         result=$(echo $line | grep "#import <")
