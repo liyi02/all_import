@@ -1,7 +1,7 @@
 
 cd `dirname $0`
 dir=`pwd`
-h_suffix=".h"
+change_name="false"
 
 #寻找此此文件是否在当前仓库
 function is_current_repo(){
@@ -26,8 +26,9 @@ function is_repo_dependent(){
 }
 
 git show> all_diff.txt
-sort all_diff.txt |uniq > all_diff1.txt
-cat all_diff1.txt | while read line
+sort all_diff.txt |uniq > new_all_diff.txt
+
+while read line
 do
     result=$(echo $line | grep "+")
     if [[ "$result" != "" ]]
@@ -43,12 +44,14 @@ do
                 is_repo_dependent $real_name_before
                 if test $? = 0
                 then
-                echo ${real_name_before}"没有被这个仓库依赖，请正确依赖">>result.txt
+                change_name="true"
+                echo ${real_name_before}"没有被这个仓库依赖，请正确依赖"
             fi
             else
                 real_name=${line#*<}
                 real_name=${real_name%%>*}
-                echo ${real_name}"其他仓库的头文件不可以使用<>不带库名的方式引入，请修改">>result.txt
+                change_name="true"
+                echo ${real_name}"其他仓库的头文件不可以使用<>不带库名的方式引入，请修改"
             fi
         else
         result=$(echo $line | grep "#import \"")
@@ -62,7 +65,8 @@ do
                     is_repo_dependent $real_name_before
                     if test $? = 0
                     then
-                    echo ${real_name_before}"没有被这个仓库依赖，请正确依赖">>result.txt
+                    change_name="true"
+                    echo ${real_name_before}"没有被这个仓库依赖，请正确依赖"
                     fi
                 else
                     real_name=${line#*\"}
@@ -70,30 +74,25 @@ do
                     is_current_repo $real_name
                     if [[ "$?" == "0" ]]
                     then
-                    echo ${real_name}"不是本仓库的头文件，请使用<库名/类名>的方式引用">>result.txt
+                    change_name="true"
+                    echo ${real_name}"不是本仓库的头文件，请使用<库名/类名>的方式引用"
                     fi
                  fi
             fi
         fi
     fi
-done
+done< new_all_diff.txt
 
+rm -f all_diff.txt
+rm -f new_all_diff.txt
 
-if [ -s "result.txt" ];
-then
-   cat "result.txt" | while read line
-   do
-       echo $line
-   done
-   rm -f all_diff.txt
-   rm -f all_diff1.txt
-   rm -f result.txt
-   exit 1
+if [ -z $change_name ]
+    then
+    exit 0
 else
-   exit 1
-   rm -f all_diff.txt
-   rm -f all_diff1.txt
+    exit 1
 fi
+
 
 
 
