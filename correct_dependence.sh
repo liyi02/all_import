@@ -34,7 +34,7 @@ do
     is_current_repo $file_name
     if [[ "$?" == "0" ]]
         then
-            result=$(echo ${line} | grep $file_name | grep '>')
+            result=$(echo ${line} | grep '>')
             if [[ "$result" != "" ]]
             then
                 #输test出红色文案提醒
