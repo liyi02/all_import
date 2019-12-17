@@ -18,13 +18,15 @@ function is_current_repo() {
 #寻找此仓库是否正确依赖
 function is_correct_dependent() {
     podspec_name=${dir##*/}
-    result=`cat ${dir}/${podspec_name}.podspec | grep $1`
+    result=`cat ${dir}/*.podspec | grep $1`
     if [[ "$result" != "" ]]
     then
         return 0
     fi
     return 1
 }
+rm result.txt
+
 echo "`git show | sort | uniq | grep '^+*#import'`">result.txt
 
 while read line
@@ -33,34 +35,38 @@ do
     is_current_repo $file_name
     if [[ "$?" == "0" ]]
         then
-           result=$(echo ${line} | grep $file_name | grep '>')
-           if [[ "$result" != "" ]]
-           then
-           echo ${file_name}"这个头文件是本库中的，不需要尖括号方式引用，请修改"
-           change_name="true"
-           fi
+            result=$(echo ${line} | grep $file_name | grep '>')
+            if [[ "$result" != "" ]]
+            then
+                #输test出红色文案提醒
+                echo "\033[31m${file_name}"这个头文件是本库中的，不需要尖括号方式引用，请修改"\033[0m"
+                change_name="true"
+            fi
     else
         result=$(echo ${line} | grep $file_name | grep '<' | grep '>' | grep '/')
         if [[ "$result" == "" ]]
         then
-            echo ${file_name}"这个头文件是其他库中的，需要用尖括号库名斜杠类名方式引用，请修改"
+            #输出红色文案提醒
+            echo "\033[31m${file_name}"这个头文件是其他库中的，需要用尖括号库名斜杠类名方式引用，请修改"\033[0m"
             change_name="true"
         else
             repo_name=`echo ${line} |awk -F '[/]' '{print $1}' | awk -F '[<]' '{print $NF}'`
             is_correct_dependent $repo_name
             if [[ "$?" == "1" ]]
             then
-                echo $repo_name"没有被本仓库依赖，请正确依赖"
+                #输出红色文案提醒
+                echo "\033[31m$repo_name"没有被本仓库依赖，请正确依赖"\033[0m"
+                change_name="true"
             fi
-            library_name=${line%/*}
         fi
     fi
 done< result.txt
 
+rm result.txt
 
-if [ -z $change_name ]
+if [ $change_name == "true" ]
     then
     exit 1
 else
-    exit 1
+    exit 0
 fi
