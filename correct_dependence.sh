@@ -1,13 +1,12 @@
 cd `dirname $0`
 dir=`pwd`
 change_name="false"
-
+dir_name=${dir##*/}
 
 
 #寻找此此文件是否在当前仓库
 function is_current_repo() {
-    podspec_name=${dir##*/}
-    result=`ls -R ${dir}/${podspec_name} | grep -v ^d | awk '{print $1}' | grep $1`
+    result=`ls -R ${dir}/${dir_name} | grep -v ^d | awk '{print $1}' | grep $1`
     if [[ "$result" != "" ]]
     then
         return 0
@@ -17,7 +16,6 @@ function is_current_repo() {
 
 #寻找此仓库是否正确依赖
 function is_correct_dependent() {
-    podspec_name=${dir##*/}
     result=`cat ${dir}/*.podspec | grep $1`
     if [[ "$result" != "" ]]
     then
@@ -31,7 +29,8 @@ echo "`git show | sort | uniq | grep '^+*#import'`">result.txt
 
 while read line
 do
-    file_name=`echo ${line} |awk -F '[/]' '{print $NF}' |awk -F '["]' '{print $(NF-1)}' |awk -F '[>]' '{print $(NF-1)}'`
+    #计算出文件名：左侧剪切掉<与/左侧的字符；右侧剪切掉"或者>以右的字符
+    file_name=`echo ${line} |awk -F '/' '{print $NF}'|awk -F '<' '{print $NF}' |awk -F '"' '{print $(NF-1)}' |awk -F '>' '{print $(NF-1)}'`
     is_current_repo $file_name
     if [[ "$?" == "0" ]]
         then
@@ -43,7 +42,7 @@ do
                 change_name="true"
             fi
     else
-        result=$(echo ${line} | grep $file_name | grep '<' | grep '>' | grep '/')
+        result=$(echo ${line} | grep '<' | grep '>' | grep '/')
         if [[ "$result" == "" ]]
         then
             #输出红色文案提醒
